@@ -1,0 +1,1 @@
+kubectl create -n container-basis secret generic dockerhub-account --username 123 --password 123

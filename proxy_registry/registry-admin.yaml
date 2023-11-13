@@ -1,0 +1,149 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: container-basis
+  name: reg-admin
+  labels:
+    app: reg-admin
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: reg-admin
+  template:
+    metadata:
+      labels:
+        app: reg-admin
+    spec:
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - key: app
+                  operator: In
+                  values:
+                  - reg-admin
+              topologyKey: kubernetes.io/hostname
+            weight: 1
+      containers:
+      - name: reg-admin
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        image: yangchuansheng/registry-proxy:latest
+        env:
+        - name: DELETE_ENABLED
+          value: "true"
+        ports:
+        - containerPort: 5000
+          protocol: TCP
+        volumeMounts:
+        - mountPath: /etc/localtime
+          name: localtime
+        - mountPath: /var/lib/registry
+          name: local
+      volumes:
+      - name: localtime
+        hostPath:
+          path: /etc/localtime
+      - name: local
+        persistentVolumeClaim:
+          claimName: registry-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: reg-admin
+  namespace: container-basis
+  labels:
+    app: reg-admin
+spec:
+  selector:
+    app: reg-admin
+  ports:
+    - protocol: TCP
+      name: http
+      port: 5000
+      targetPort: 5000
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: container-basis
+  name: registry-ui
+  labels:
+    app: registry-ui
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: registry-ui
+  template:
+    metadata:
+      labels:
+        app: registry-ui
+    spec:
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - key: app
+                  operator: In
+                  values:
+                  - registry-ui
+              topologyKey: kubernetes.io/hostname
+            weight: 1
+      tolerations:
+      - key: node-role.kubernetes.io/ingress
+        operator: Exists
+        effect: NoSchedule
+      containers:
+      - name: registry-ui
+        image: joxit/docker-registry-ui:latest
+        resources:
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        env:
+        - name: REGISTRY_TITLE
+          value: My Private Docker Registry
+        - name: NGINX_PROXY_PASS_URL
+          value: "http://reg-admin:5000"
+        - name: DELETE_IMAGES
+          value: "true"
+        - name: SINGLE_REGISTR
+          value: "true"
+        ports:
+        - containerPort: 80
+          protocol: TCP
+        volumeMounts:
+        - mountPath: /etc/localtime
+          name: localtime
+      volumes:
+      - name: localtime
+        hostPath:
+          path: /etc/localtime
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: registry-ui
+  namespace: container-basis
+  labels:
+    app: registry-ui
+spec:
+  selector:
+    app: registry-ui
+  ports:
+    - protocol: TCP
+      name: http
+      port: 80
+      targetPort: 80
