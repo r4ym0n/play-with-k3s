@@ -1,0 +1,28 @@
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  namespace: container-basis
+  name: dashboard
+spec:
+  entryPoints:
+    - web
+  routes:
+    - kind: Rule
+      match: Host(`traefik-ui.k3.net`)
+      services:
+        - kind: Service
+          name: registry-ui
+          namespace: container-basis
+          port: 80
+          
+# spec:
+#   entryPoints:
+#     - web
+#   routes:
+#   - match: Host(`example.com`) && PathPrefix(`/foo`)
+#     kind: Rule
+#     services:
+#     - name: svc1
+#       namespace: default
+#     - name: svc2
+#       namespace: default
