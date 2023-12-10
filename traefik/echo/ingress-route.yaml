@@ -1,0 +1,21 @@
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  namespace: default
+  name: echo-ingress
+spec:
+  entryPoints:
+    - web
+  routes:
+    - kind: Rule
+      match: Host(`traefik-ui3.k3.net`)
+      services:
+        - kind: Service
+          name: echo-test
+          namespace: default
+          port: 80
+      middlewares:
+        - name: basic-auth
+          namespace: kube-system
+        - name: echo-header
+          namespace: default

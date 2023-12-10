@@ -2,13 +2,13 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: k8s-gcr-registry-svc
+  name: k8s-quay-registry-svc
   namespace: container-basis
   labels:
-    run: k8s-gcr-registry
+    run: k8s-quay-registry
 spec:
   selector:
-    app: k8s-gcr-registry
+    app: k8s-quay-registry
   ports:
     - protocol: TCP
       port: 5000
@@ -17,20 +17,20 @@ spec:
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: registry-ingress-k8s-gcr
+  name: registry-ingress-k8s-quay
   namespace: container-basis
   annotations:
     kubernetes.io/ingress.class: "traefik"
 spec:
   rules:
-  - host: k8s-gcr-k3s.io
+  - host: quay-k3s.io
     http:
       paths:
       - path: /
         pathType: ImplementationSpecific
         backend:
           service: 
-            name: k8s-gcr-registry-svc
+            name: k8s-quay-registry-svc
             port:
               number: 5000
 
@@ -38,22 +38,22 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: k8s-gcr-registry
+  name: k8s-quay-registry
   namespace: container-basis
   labels:
-    app: k8s-gcr-registry
+    app: k8s-quay-registry
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: k8s-gcr-registry
+      app: k8s-quay-registry
   template:
     metadata:
       labels:
-        app: k8s-gcr-registry
+        app: k8s-quay-registry
     spec:
       containers:
-      - name: k8s-gcr-registry
+      - name: k8s-quay-registry
         resources:
           requests:
             cpu: 100m
@@ -67,14 +67,14 @@ spec:
           protocol: TCP
         volumeMounts:
         - name: local
-          mountPath: /hub
+          mountPath: /var/lib/registry
         env:
         - name: REGISTRY_HTTP_ADDR
           value: :5000
         - name: REGISTRY_STORAGE_FILESYSTEM_ROOTDIRECTORY
-          value: /hub
+          value: /var/lib/registry
         - name: PROXY_REMOTE_URL
-          value: https://k8s.gcr.io
+          value: https://quay.io
       volumes:
       - name: local
         persistentVolumeClaim:

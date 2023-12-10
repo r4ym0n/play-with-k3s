@@ -2,13 +2,13 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: hub-registry-svc
+  name: gcr-registry-svc
   namespace: container-basis
   labels:
-    run: hub-registry
+    run: gcr-registry
 spec:
   selector:
-    app: hub-registry
+    app: gcr-registry
   ports:
     - protocol: TCP
       port: 5000
@@ -17,20 +17,20 @@ spec:
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: registry-ingress-hub
+  name: registry-ingress-gcr
   namespace: container-basis
   annotations:
     kubernetes.io/ingress.class: "traefik"
 spec:
   rules:
-  - host: hub-k3s.io
+  - host: gcr-k3s.io
     http:
       paths:
       - path: /
         pathType: ImplementationSpecific
         backend:
           service: 
-            name: hub-registry-svc
+            name: gcr-registry-svc
             port:
               number: 5000
 
@@ -38,22 +38,22 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: hub-registry
+  name: gcr-registry
   namespace: container-basis
   labels:
-    app: hub-registry
+    app: gcr-registry
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: hub-registry
+      app: gcr-registry
   template:
     metadata:
       labels:
-        app: hub-registry
+        app: gcr-registry
     spec:
       containers:
-      - name: hub-registry
+      - name: gcr-registry
         resources:
           requests:
             cpu: 100m
@@ -67,24 +67,14 @@ spec:
           protocol: TCP
         volumeMounts:
         - name: local
-          mountPath: /hub
+          mountPath: /var/lib/registry
         env:
         - name: REGISTRY_HTTP_ADDR
           value: :5000
         - name: REGISTRY_STORAGE_FILESYSTEM_ROOTDIRECTORY
-          value: /hub
+          value: /var/lib/registry
         - name: PROXY_REMOTE_URL
-          value: https://registry-1.docker.io
-        - name: PROXY_USERNAME
-          valueFrom:
-            secretKeyRef:
-              name: dockerhub-account
-              key: uername
-        - name: PROXY_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: dockerhub-account
-              key: password
+          value: https://gcr.io
       volumes:
       - name: local
         persistentVolumeClaim:

@@ -1,0 +1,11 @@
+apiVersion: traefik.containo.us/v1alpha1
+kind: Middleware
+metadata:
+  name: echo-header
+  namespace: default
+spec:
+  headers:
+    customRequestHeaders:
+      X-Script-Name: "test"
+    customResponseHeaders:
+      X-Custom-Response-Header: "value"

@@ -15,4 +15,16 @@ spec:
       middlewares:
         - name: basic-auth
           namespace: kube-system
-  
+    - kind: Rule
+      match: Host(`traefik-ui3.k3.net`)
+      # services:
+      #   - kind: TraefikService
+          # name: api@internal
+      services:
+        - kind: Service
+          name: echo-test
+          namespace: default
+          port: 80
+      middlewares:
+        - name: basic-auth
+          namespace: kube-system
