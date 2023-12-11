@@ -1,0 +1,14 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: local-r4y
+  namespace: default
+spec:
+  secretName: local-r4y
+  issuerRef:
+    name: letsencrypt-staging
+    kind: ClusterIssuer
+  commonName: "*.local.r4y.site"
+  dnsNames:
+    - "local.r4y.site"
+    - "*.local.r4y.site"
