@@ -1,0 +1,60 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: qinglong
+  namespace: homelab
+spec:
+  selector:
+    app: qinglong
+  ports:
+    - protocol: TCP
+      name: web
+      port: 5700
+      targetPort: 5700
+  type: ClusterIP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: qinglong
+  namespace: homelab
+spec:
+  selector:
+    matchLabels:
+      app: qinglong
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: qinglong
+    spec:
+      containers:
+        - name: qinglong
+          resources:
+            limits:
+              cpu: 500m
+              memory: 512Mi
+          image: whyour/qinglong:latest
+          ports:
+            - containerPort: 5700
+          volumeMounts:
+            - name: qinglong-data
+              mountPath: /ql/data
+      volumes:
+        - name: qinglong-data
+          persistentVolumeClaim:
+            claimName: qinglong-nfs-pvc
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: qinglong-nfs-pvc
+  namespace: homelab
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+  storageClassName: nas-nfs
+  volumeMode: Filesystem
