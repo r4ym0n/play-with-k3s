@@ -1,0 +1,125 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: prometheus-user-config
+  namespace: monitoring
+data:
+  prometheus.yml: |-
+    global:
+      scrape_interval: 30s
+    scrape_configs:
+      - job_name: 'prometheus'
+        static_configs:
+          - targets: ['localhost:9090']
+      - job_name: 'traefik'
+        metrics_path: '/metrics'
+        static_configs:
+          - targets: ['traefik-dashboard.kube-system:9100']
+      - job_name: 'node'
+        metrics_path: '/metrics'
+        static_configs:
+          - targets: ['192.168.3.1:9100']
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: prometheus-user-pvc
+  namespace: monitoring
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 2Gi
+  storageClassName: nas-nfs
+  volumeMode: Filesystem
+
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: prometheus-user
+  namespace: monitoring
+spec:
+  serviceName: "prometheus-user"
+  replicas: 1
+  selector:
+    matchLabels:
+      app: prometheus-user
+  template:
+    metadata:
+      labels:
+        app: prometheus-user
+    spec:
+      containers:
+        - name: prometheus-user
+          resources:
+            limits:
+              cpu: 1000m
+              memory: 1024Mi
+          image: prom/prometheus
+          args:
+            - --web.enable-lifecycle
+            - --config.file=/etc/prometheus/prometheus.yml
+          ports:
+            - containerPort: 9090
+          volumeMounts:
+            - name: prometheus-user-storage
+              mountPath: /prometheus
+            - name: prometheus-user-config
+              mountPath: /etc/prometheus
+        - name: configmap-reload
+          image: jimmidyson/configmap-reload
+          args:
+            - --volume-dir=/etc/prometheus
+            - --webhook-url=http://127.0.0.1:9090/-/reload
+            - --webhook-method=POST
+          volumeMounts:
+            - name: prometheus-user-config
+              mountPath: /etc/prometheus
+              readOnly: true
+
+      serviceAccountName: prometheus-user
+      serviceAccount: prometheus-user
+        
+  
+      securityContext:
+        runAsUser: 1000
+        fsGroup: 1000
+      volumes:
+        - name: prometheus-user-storage
+          persistentVolumeClaim:
+            claimName: prometheus-user-pvc
+        - name: prometheus-user-config
+          configMap:
+            name: prometheus-user-config
+
+  volumeClaimTemplates:
+    - metadata:
+        name: prometheus-user-storage
+      spec:
+        accessModes: [ "ReadWriteOnce" ]
+        resources:
+          requests:
+            storage: 2Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: prometheus-user-service
+  namespace: monitoring
+spec:
+  selector:
+    app: prometheus-user
+  ports:
+    - protocol: TCP
+      port: 9090
+      targetPort: 9090
+  type: ClusterIP
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: prometheus-user
+  namespace: monitoring
