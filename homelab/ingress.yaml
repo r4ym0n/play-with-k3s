@@ -21,6 +21,14 @@ spec:
           name: qinglong
           namespace: homelab
           port: 5700
+    - kind: Rule
+      match: Host(`freshrss.local.r4y.site`) && PathPrefix(`/`)
+      services:
+        - kind: Service
+          name: freshrss
+          namespace: homelab
+          port: 80
+          
       # middlewares:
       #   - name: basic-auth
       #     namespace: kube-system
@@ -28,3 +36,43 @@ spec:
       #     namespace: default
   # tls:
   #   secretName: local-r4y-prod
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  namespace: homelab
+  name: homelab-ingress-tls
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - kind: Rule
+      match: Host(`upkuma.local.r4y.site`) && PathPrefix(`/`)
+      services:
+        - kind: Service
+          name: uptime-kuma
+          namespace: homelab
+          port: 3001
+    - kind: Rule
+      match: Host(`qinglong.local.r4y.site`) && PathPrefix(`/`)
+      services:
+        - kind: Service
+          name: qinglong
+          namespace: homelab
+          port: 5700
+    - kind: Rule
+      match: Host(`freshrss.local.r4y.site`) && PathPrefix(`/`)
+      services:
+        - kind: Service
+          name: freshrss
+          namespace: homelab
+          port: 80
+          
+      # middlewares:
+      #   - name: basic-auth
+      #     namespace: kube-system
+      #   - name: echo-header
+      #     namespace: default
+  tls:
+    secretName: local-r4y-prod
+    

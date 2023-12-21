@@ -1,0 +1,73 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: freshrss
+  namespace: homelab
+spec:
+  selector:
+    app: freshrss
+  ports:
+    - protocol: TCP
+      name: web
+      port: 80
+      targetPort: 80
+  type: ClusterIP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: freshrss
+  namespace: homelab
+spec:
+  selector:
+    matchLabels:
+      app: freshrss
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: freshrss
+    spec:
+      containers:
+        - name: freshrss
+          resources:
+            limits:
+              cpu: 1000m
+              memory: 1024Mi
+          image: freshrss/freshrss:latest
+          ports:
+            - containerPort: 80
+          volumeMounts:
+            - name: freshrss-data
+              mountPath: /var/www/FreshRSS/data
+              subPath: data
+            - name: freshrss-data
+              mountPath: /var/www/FreshRSS/extensions
+              subPath: extensions
+          env:
+            - name: DB_NAME
+              value: freshrss
+            - name: DB_USER
+              value: freshrss
+            - name: DB_PASSWORD
+              value: freshrss
+            - name: DB_HOST
+              value: pgsql.database-common:5432
+      volumes:
+        - name: freshrss-data
+          persistentVolumeClaim:
+            claimName: freshrss-nfs-pvc
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: freshrss-nfs-pvc
+  namespace: homelab
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+  storageClassName: nas-nfs
+  volumeMode: Filesystem
