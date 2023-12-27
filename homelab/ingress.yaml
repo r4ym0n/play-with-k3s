@@ -28,6 +28,13 @@ spec:
           name: freshrss
           namespace: homelab
           port: 80
+    - kind: Rule
+      match: Host(`stirling.local.r4y.site`) && PathPrefix(`/`)
+      services:
+        - kind: Service
+          name: stirling-pdf
+          namespace: homelab
+          port: 8080
           
       # middlewares:
       #   - name: basic-auth
@@ -67,7 +74,13 @@ spec:
           name: freshrss
           namespace: homelab
           port: 80
-          
+    - kind: Rule
+      match: Host(`stirling.local.r4y.site`) && PathPrefix(`/`)
+      services:
+        - kind: Service
+          name: stirling-pdf
+          namespace: homelab
+          port: 8080
       # middlewares:
       #   - name: basic-auth
       #     namespace: kube-system

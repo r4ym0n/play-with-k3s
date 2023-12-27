@@ -1,0 +1,68 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: stirling-pdf
+  namespace: homelab
+spec:
+  selector:
+    matchLabels:
+      app: stirling-pdf
+  template:
+    metadata:
+      labels:
+        app: stirling-pdf
+    spec:
+      containers:
+        - name: stirling-pdf
+          image: frooodle/s-pdf:latest
+          ports:
+            - containerPort: 8080
+          resources:
+            limits:
+              cpu: 1000m
+              memory: 1024Mi
+          env:
+            - name: DOCKER_ENABLE_SECURITY
+              value: "false"
+          volumeMounts:
+            - name: data-spdf
+              mountPath: /usr/share/tesseract-ocr/5/tessdata
+              subPath: trainingData
+            - name: data-spdf
+              mountPath: /configs
+              subPath: extraConfigs
+            - name: data-spdf
+              mountPath: /customFiles
+              subPath: customFiles      
+      volumes:
+        - name: data-spdf
+          persistentVolumeClaim:
+            claimName: pvc-nfs-spdf
+---
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: homelab
+  name: stirling-pdf
+spec:
+  selector:
+    app: stirling-pdf
+  ports:
+  - port: 8080
+    targetPort: 8080
+    protocol: TCP
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pvc-nfs-spdf
+  namespace: homelab
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 1Gi
+  storageClassName: nas-nfs
+  volumeMode: Filesystem
