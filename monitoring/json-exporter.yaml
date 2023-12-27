@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: json-exporter
+  labels:
+    app: json-exporter
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: json-exporter
+  template:
+    metadata:
+      labels:
+        app: json-exporter
+    spec:
+      containers:
+        - name: json-exporter
+          image: <json-exporter-image>
+          resources:
+            limits:
+              cpu: 200m
+              memory: 256Mi
+          ports:
+            - containerPort: 8080
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: json-exporter
+spec:
+  selector:
+    app: json-exporter
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080
