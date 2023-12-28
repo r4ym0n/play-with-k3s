@@ -1,0 +1,69 @@
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: user-admin-ingress
+spec:
+  entryPoints:
+    - web
+  routes:
+    - kind: Rule
+      match: Host(`traefik-ui.local.r4y.site`)
+      services:
+        - kind: TraefikService
+          name: api@internal
+          namespace: kube-system
+      middlewares:
+        - name: redirect-https-middleware
+        - name: basic-auth
+          namespace: kube-system
+    - kind: Rule
+      match: Host(`traefik.local.r4y.site`)
+      services:
+        - kind: Service
+          name: traefik-dashboard
+          namespace: kube-system
+          port: 9000
+      middlewares:
+        - name: redirect-https-middleware
+        
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  namespace: homelab
+  name: homelab-ingress-tls
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - kind: Rule
+      match: Host(`traefik-ui.local.r4y.site`)
+      services:
+        - kind: TraefikService
+          name: api@internal
+          namespace: kube-system
+    - kind: Rule
+      match: Host(`traefik.admin.r4y.site`)
+      services:
+        - kind: Service
+          name: traefik-dashboard
+          namespace: kube-system
+          port: 9000
+  tls:
+    secretName: local-r4y-prod
+
+    
+
+    # - kind: Rule
+    #   match: Host(`traefik-ui3.k3.net`)
+    #   # services:
+    #   #   - kind: TraefikService
+    #       # name: api@internal
+    #   services:
+    #     - kind: Service
+    #       name: echo-test
+    #       namespace: default
+    #       port: 80
+    #   middlewares:
+    #     - name: basic-auth
+    #       namespace: kube-system

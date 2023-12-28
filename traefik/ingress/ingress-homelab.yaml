@@ -35,7 +35,8 @@ spec:
           name: stirling-pdf
           namespace: homelab
           port: 8080
-          
+  middlewares:
+    - name: redirect-https-middleware
       # middlewares:
       #   - name: basic-auth
       #     namespace: kube-system
@@ -88,4 +89,13 @@ spec:
       #     namespace: default
   tls:
     secretName: local-r4y-prod
-    
+
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: Middleware
+metadata:
+  namespace: homelab
+  name: redirect-https-middleware
+spec:
+  redirectScheme:
+    scheme: https
