@@ -1,0 +1,49 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  namespace: homelab
+  annotations:
+    spec.ingressClassName: "traefik"
+  name: firefly-iii-ingress
+spec:
+  rules:
+  - host: firefly-iii.local.r4y.site
+    http:
+      paths:
+      - backend:
+          service:
+            name: firefly-iii
+            port:
+              number: 8080
+        path: /
+        pathType: Prefix
+  tls:
+  - hosts:
+    - firefly-iii.local.r4y.site
+    secretName: local-r4y-prod
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  namespace: homelab
+  annotations:
+    spec.ingressClassName: "traefik"
+  name: firefly-iii-importer-ingress
+spec:
+  rules:
+  - host: firefly-iii-importer.local.r4y.site
+    http:
+      paths:
+      - backend:
+          service:
+            name: firefly-iii-importer
+            port:
+              number: 8080
+        path: /
+        pathType: Prefix
+  tls:
+    - hosts:
+      - firefly-iii-importer.local.r4y.site
+      secretName: local-r4y-prod
+
+
