@@ -30,8 +30,7 @@ spec:
 apiVersion: traefik.containo.us/v1alpha1
 kind: IngressRoute
 metadata:
-  namespace: homelab
-  name: homelab-ingress-tls
+  name: user-admin-ingress-tls
 spec:
   entryPoints:
     - websecure
@@ -50,7 +49,7 @@ spec:
           namespace: kube-system
           port: 9000
   tls:
-    secretName: local-r4y-prod
+    secretName: local-r4y-admin-prod
 
     
 

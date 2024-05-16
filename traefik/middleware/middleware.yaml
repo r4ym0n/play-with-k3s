@@ -16,3 +16,13 @@ metadata:
 spec:
   redirectScheme:
     scheme: https   # 自动跳转到 https
+
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: Middleware
+metadata:
+  namespace: homelab
+  name: redirect-https-middleware
+spec:
+  redirectScheme:
+    scheme: https

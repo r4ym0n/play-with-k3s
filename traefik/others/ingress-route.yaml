@@ -8,7 +8,7 @@ spec:
     - web
   routes:
     - kind: Rule
-      match: Host(`traefik-ui.k3.net`)
+      match: Host(`reg-admin.k3.net`)
       services:
         - kind: Service
           name: registry-ui

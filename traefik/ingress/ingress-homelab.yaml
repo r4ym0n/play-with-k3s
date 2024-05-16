@@ -14,6 +14,9 @@ spec:
           name: uptime-kuma
           namespace: homelab
           port: 3001
+      middlewares:
+        - name: redirect-https-middleware
+          namespace: default
     - kind: Rule
       match: Host(`qinglong.local.r4y.site`) && PathPrefix(`/`)
       services:
@@ -21,6 +24,9 @@ spec:
           name: qinglong
           namespace: homelab
           port: 5700
+      middlewares:
+        - name: redirect-https-middleware
+          namespace: default
     - kind: Rule
       match: Host(`freshrss.local.r4y.site`) && PathPrefix(`/`)
       services:
@@ -28,6 +34,9 @@ spec:
           name: freshrss
           namespace: homelab
           port: 80
+      middlewares:
+        - name: redirect-https-middleware
+          namespace: default
     - kind: Rule
       match: Host(`stirling.local.r4y.site`) && PathPrefix(`/`)
       services:
@@ -35,15 +44,9 @@ spec:
           name: stirling-pdf
           namespace: homelab
           port: 8080
-  middlewares:
-    - name: redirect-https-middleware
-      # middlewares:
-      #   - name: basic-auth
-      #     namespace: kube-system
-      #   - name: echo-header
-      #     namespace: default
-  # tls:
-  #   secretName: local-r4y-prod
+      middlewares:
+        - name: redirect-https-middleware
+          namespace: default
 ---
 apiVersion: traefik.containo.us/v1alpha1
 kind: IngressRoute
@@ -90,12 +93,3 @@ spec:
   tls:
     secretName: local-r4y-prod
 
----
-apiVersion: traefik.containo.us/v1alpha1
-kind: Middleware
-metadata:
-  namespace: homelab
-  name: redirect-https-middleware
-spec:
-  redirectScheme:
-    scheme: https
