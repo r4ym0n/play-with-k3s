@@ -6,9 +6,10 @@ metadata:
 spec:
   entryPoints:
     - websecure
+    - web
   routes:
     - kind: Rule
-      match: Host(`traefik-ui.local.r4y.site`) && PathPrefix(`/`)
+      match: Host(`echo.local.r4y.site`) && PathPrefix(`/`)
       services:
         - kind: Service
           name: echo-test
@@ -21,26 +22,26 @@ spec:
           namespace: default
   tls:
     secretName: local-r4y-prod
----
-apiVersion: traefik.containo.us/v1alpha1
-kind: IngressRoute
-metadata:
-  namespace: default
-  name: echo-ingress
-spec:
-  entryPoints:
-    - web
-  routes:
-    - kind: Rule
-      match: Host(`traefik-ui.local.r4y.site`) && PathPrefix(`/`)
-      services:
-        - kind: Service
-          name: echo-test
-          namespace: default
-          port: 80
-      middlewares:
-        - name: basic-auth
-          namespace: kube-system
-        - name: echo-header
-          namespace: default
+# ---
+# apiVersion: traefik.containo.us/v1alpha1
+# kind: IngressRoute
+# metadata:
+#   namespace: default
+#   name: echo-ingress
+# spec:
+#   entryPoints:
+#     - web
+#   routes:
+#     - kind: Rule
+#       match: Host(`echo.local.r4y.site`) && PathPrefix(`/`)
+#       services:
+#         - kind: Service
+#           name: echo-test
+#           namespace: default
+#           port: 80
+#       middlewares:
+#         - name: basic-auth
+#           namespace: kube-system
+#         - name: echo-header
+#           namespace: default
   
