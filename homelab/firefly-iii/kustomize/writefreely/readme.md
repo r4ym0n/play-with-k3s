@@ -1,6 +1,8 @@
 
 修改容器的entry为sleep 1000.
 之后 exec 上去执行 命令
+
+但是这里最好是使用initialContainer 来完成初始化操作。
 ```
 ./cmd/writefreely/writefreely --config
 # 安引导步骤完成初始化
