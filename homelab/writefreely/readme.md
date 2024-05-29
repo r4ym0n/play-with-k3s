@@ -16,3 +16,5 @@ docker-compose exec db sh -c 'exec mysql -u root -pchangeme writefreely < /tmp/s
 docker exec writefreely_web_1 writefreely --gen-keys
 docker exec -it writefreely_web_1 writefreely --config
 ```
+
+ writefreel是结合了nostr技术的博客
