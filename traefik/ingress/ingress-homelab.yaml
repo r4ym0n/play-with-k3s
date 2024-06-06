@@ -1,52 +1,69 @@
+# apiVersion: traefik.containo.us/v1alpha1
+# kind: IngressRoute
+# metadata:
+#   namespace: homelab
+#   name: homelab-ingress
+# spec:
+#   entryPoints:
+#     - web
+#   routes:
+#     - kind: Rule
+#       match: Host(`upkuma.local.r4y.site`) && PathPrefix(`/`)
+#       services:
+#         - kind: Service
+#           name: uptime-kuma
+#           namespace: homelab
+#           port: 3001
+#       middlewares:
+#         - name: redirect-https-middleware
+#           namespace: default
+#     - kind: Rule
+#       match: Host(`qinglong.local.r4y.site`) && PathPrefix(`/`)
+#       services:
+#         - kind: Service
+#           name: qinglong
+#           namespace: homelab
+#           port: 5700
+#       middlewares:
+#         - name: redirect-https-middleware
+#           namespace: default
+#     - kind: Rule
+#       match: (Host(`freshrss.local.r4y.site`) || Host(`freshrss.r4y.site`)) && PathPrefix(`/`)
+#       services:
+#         - kind: Service
+#           name: freshrss
+#           namespace: homelab
+#           port: 80
+#       middlewares:
+#         - name: redirect-https-middleware
+#           namespace: default
+#     - kind: Rule
+#       match: Host(`stirling.local.r4y.site`) && PathPrefix(`/`)
+#       services:
+#         - kind: Service
+#           name: stirling-pdf
+#           namespace: homelab
+#           port: 8080
+#       middlewares:
+#         - name: redirect-https-middleware
+          # namespace: default
+---
 apiVersion: traefik.containo.us/v1alpha1
 kind: IngressRoute
 metadata:
   namespace: homelab
-  name: homelab-ingress
+  name: homelab-ingress-ext
 spec:
   entryPoints:
     - web
   routes:
     - kind: Rule
-      match: Host(`upkuma.local.r4y.site`) && PathPrefix(`/`)
-      services:
-        - kind: Service
-          name: uptime-kuma
-          namespace: homelab
-          port: 3001
-      middlewares:
-        - name: redirect-https-middleware
-          namespace: default
-    - kind: Rule
-      match: Host(`qinglong.local.r4y.site`) && PathPrefix(`/`)
-      services:
-        - kind: Service
-          name: qinglong
-          namespace: homelab
-          port: 5700
-      middlewares:
-        - name: redirect-https-middleware
-          namespace: default
-    - kind: Rule
-      match: Host(`freshrss.local.r4y.site`) && PathPrefix(`/`)
+      match: Host(`frrss.r4y.site`) && PathPrefix(`/`)
       services:
         - kind: Service
           name: freshrss
           namespace: homelab
           port: 80
-      middlewares:
-        - name: redirect-https-middleware
-          namespace: default
-    - kind: Rule
-      match: Host(`stirling.local.r4y.site`) && PathPrefix(`/`)
-      services:
-        - kind: Service
-          name: stirling-pdf
-          namespace: homelab
-          port: 8080
-      middlewares:
-        - name: redirect-https-middleware
-          namespace: default
 ---
 apiVersion: traefik.containo.us/v1alpha1
 kind: IngressRoute
@@ -56,6 +73,7 @@ metadata:
 spec:
   entryPoints:
     - websecure
+    - web
   routes:
     - kind: Rule
       match: Host(`upkuma.local.r4y.site`) && PathPrefix(`/`)
