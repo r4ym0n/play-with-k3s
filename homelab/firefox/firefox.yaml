@@ -1,0 +1,71 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: firefox
+  namespace: homelab
+  labels:
+    app: firefox
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: firefox
+  template:
+    metadata:
+      labels:
+        app: firefox
+    spec:
+      containers:
+        - name: firefox
+          image: jlesage/firefox
+          resources:
+            limits:
+              memory: 1000Mi
+              cpu: 1000m
+          ports:
+            - containerPort: 5800
+      #     volumeMounts:
+      #       - name: config
+      #         mountPath: /config
+      # volumes:
+      #   - name: config
+      #     hostPath:
+      #       path: /docker/appdata/firefox
+      #       type: Directory
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: firefox
+  namespace: homelab
+spec:
+  selector:
+    app: firefox
+  ports:
+    - protocol: TCP
+      port: 5800
+      targetPort: 5800
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: firefox-ingressroute
+  namespace: homelab
+spec:
+  entryPoints:
+    - web
+    - websecure
+  routes:
+    - match: Host(`firefox.local.r4y.site`) && PathPrefix(`/`)
+      kind: Rule
+      services:
+        - name: firefox
+          port: 5800
+          namespace: homelab
+          sticky:
+            cookie:
+              name: firefox-session-cookie
+              secure: true
+              httpOnly: true
+  tls:
+    secretName: local-r4y-prod
